@@ -68,6 +68,9 @@ export class Tests extends Service {
   async find(params?: createApplication.Params): Promise<any[] | createApplication.Paginated<any>> {
     return new Promise((resolve, reject) => {
       const queryToUse : TestDocumentQuery = params?.query ? params?.query : {};
+      if (params?.query?.testingCampaignID) {
+        queryToUse.testingCampaignID = new ObjectId(params?.query?.testingCampaignID);
+      }
 
       this.Model
         .find(queryToUse)
@@ -83,6 +86,9 @@ export class Tests extends Service {
   async get(id: createApplication.Id, params?: createApplication.Params): Promise<any> {
     return new Promise((resolve, reject) => {
       const queryToUse : IndexedTestDocumentQuery = params?.query ? params?.query : {};
+      if (params?.query?.testingCampaignID) {
+        queryToUse.testingCampaignID = new ObjectId(params?.query?.testingCampaignID);
+      }
       queryToUse._id = new ObjectId(id);
 
       this.Model
