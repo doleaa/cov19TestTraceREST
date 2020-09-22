@@ -17,6 +17,7 @@ enum TestResult {
 };
 
 interface NewTestDto {
+  _id?: string,
   testingCampaignID: string,
   employeeIdentifier: number
 }
@@ -42,14 +43,14 @@ interface TestSchema {
 }
 
 //Read query interfaces
-interface TestDocumentQuery {
+interface TestQuery {
   testingCampaignID?: ObjectId,
   employeeIdentifier?: number,
   creationTimestamp?: Date,
   status?: TestStatus,
   result?: TestResult
 }
-interface IndexedTestDocumentQuery extends TestDocumentQuery{
+interface IndexedTestQuery extends TestQuery{
   _id?: ObjectId
 }
 
@@ -67,7 +68,7 @@ export class Tests extends Service {
 
   async find(params?: createApplication.Params): Promise<any[] | createApplication.Paginated<any>> {
     return new Promise((resolve, reject) => {
-      const queryToUse : TestDocumentQuery = params?.query ? params?.query : {};
+      const queryToUse : TestQuery = params?.query ? JSON.parse(JSON.stringify(params?.query)) : {};
       if (params?.query?.testingCampaignID) {
         queryToUse.testingCampaignID = new ObjectId(params?.query?.testingCampaignID);
       }
@@ -85,7 +86,7 @@ export class Tests extends Service {
 
   async get(id: createApplication.Id, params?: createApplication.Params): Promise<any> {
     return new Promise((resolve, reject) => {
-      const queryToUse : IndexedTestDocumentQuery = params?.query ? params?.query : {};
+      const queryToUse : IndexedTestQuery = params?.query ? JSON.parse(JSON.stringify(params?.query)) : {};
       if (params?.query?.testingCampaignID) {
         queryToUse.testingCampaignID = new ObjectId(params?.query?.testingCampaignID);
       }
@@ -102,7 +103,7 @@ export class Tests extends Service {
     });
   }
 
-  async create(data: NewTestDto, params?: createApplication.Params): Promise<CreatedTestDto[] | CreatedTestDto> {
+  async create(data: NewTestDto, params?: createApplication.Params): Promise<CreatedTestDto> {
     return new Promise((resolve, reject) => {
 
       const insertableDocument: TestSchema = {
@@ -112,6 +113,9 @@ export class Tests extends Service {
         status: TestStatus.CREATED,
         result: TestResult.PENDING
       };
+      if (data._id) {
+        insertableDocument._id = new ObjectId(data._id);
+      }
 
       this.Model.insertOne(insertableDocument).then(result => {
         if (result.insertedCount !== 1) {
